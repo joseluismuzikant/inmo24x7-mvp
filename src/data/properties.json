@@ -1,0 +1,38 @@
+[
+  {
+    "id": "PAL-2A-001",
+    "operacion": "alquiler",
+    "zona": "Palermo",
+    "precio": 1200,
+    "titulo": "2 ambientes luminoso en Palermo",
+    "link": "https://example.com/propiedad/PAL-2A-001",
+    "disponible": true
+  },
+  {
+    "id": "CAB-3A-002",
+    "operacion": "venta",
+    "zona": "Caballito",
+    "precio": 150000,
+    "titulo": "3 ambientes con balcón en Caballito",
+    "link": "https://example.com/propiedad/CAB-3A-002",
+    "disponible": true
+  },
+  {
+    "id": "BEL-2A-003",
+    "operacion": "alquiler",
+    "zona": "Belgrano",
+    "precio": 900,
+    "titulo": "2 ambientes en Belgrano, cerca del subte",
+    "link": "https://example.com/propiedad/BEL-2A-003",
+    "disponible": true
+  },
+  {
+    "id": "PAL-1A-004",
+    "operacion": "alquiler",
+    "zona": "Palermo",
+    "precio": 700,
+    "titulo": "Monoambiente en Palermo",
+    "link": "https://example.com/propiedad/PAL-1A-004",
+    "disponible": false
+  }
+]
