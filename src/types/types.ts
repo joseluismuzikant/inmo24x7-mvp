@@ -13,12 +13,26 @@ export type Property = {
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
 export type SessionState = {
+  // 👇 flujo actual (NO lo tocamos todavía)
   step: "start" | "ask_operation" | "ask_zone" | "ask_budget" | "show_results" | "handoff";
-  operacion?: Operation;
-  zona?: string;
-  presupuestoMax?: number;
-  lastProperties?: Property[];   
+
+  // 👇 datos estructurados (nuevo)
+  data?: {
+    operacion?: "venta" | "alquiler";
+    zona?: string;
+    presupuestoMax?: number;
+    nombre?: string;
+    contacto?: string;
+  };
+
+  // 👇 persistencia
+  leadId?: number;
+
+  // 👇 opcional (IA)
   history?: ChatMsg[];
+
+  // 👇 legacy (si lo usás)
+  lastProperties?: Property[];
 };
 
 export type BotReply = {
