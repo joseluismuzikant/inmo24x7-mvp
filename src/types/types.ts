@@ -1,13 +1,62 @@
 export type Operation = "venta" | "alquiler";
 
 export type Property = {
+  // Identificación
   id: string;
+  posting_id?: string;
+  
+  // Información básica
   operacion: Operation;
   zona: string;
-  precio: number; // en la unidad que definas (USD o ARS)
+  zona2?: string;
+  zona3?: string;
+  precio: number;
+  currency: string;
   titulo: string;
+  generatedTitle?: string;
+  description?: string;
   link?: string;
+  url?: string;
   disponible: boolean;
+  estatus?: string;
+  
+  // Imágenes
+  imagenes?: string[];
+  numero_de_imagenes?: number;
+  
+  // Características de la propiedad
+  tipo?: string;
+  ambientes?: number;
+  banos?: number;
+  dormitorios?: number;
+  dimension_terreno?: string;
+  dimension_propiedad?: string;
+  nueva_usada?: string;
+  
+  // Ubicación
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  
+  // Publicación
+  fecha_de_publicacion?: string;
+  visualizaciones?: number;
+  
+  // Vendedor
+  tipovendedor?: string;
+  seller_name?: string;
+  seller_id?: string;
+  seller_url?: string;
+  phone1?: string;
+  phone2?: string;
+  seller_level?: string;
+  
+  // Extras
+  development_features?: Record<string, any>;
+  superdestacado?: string;
+  premium_label?: string;
+  proveedor_tour?: string;
+  expenses?: string;
 };
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
@@ -41,4 +90,3 @@ export type BotReply = {
     summary: string;
   };
 };
-

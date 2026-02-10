@@ -1,7 +1,7 @@
 import { searchProperties } from "./propertyService";
 import { leadService } from "./leadService";
 import { ensureLeadData, getLeadId, setLeadId } from "./sessionService";
-import { parseBuscarPropiedadesArgs, parseDerivarAHumanoArgs } from "./toolParser";
+import { parseBuscarPropiedadesArgs, parseDerivarAHumanoArgs, parseGuardarContactoArgs } from "./toolParser";
 import type { SessionState } from "../types/types";
 
 export interface ToolResult {
@@ -72,6 +72,43 @@ class ToolExecutor {
 
     return { ok: true, leadId, summary };
   }
+
+  executeGuardarContacto(
+    args: unknown,
+    session: SessionState,
+    userId: string
+  ): { ok: boolean; nombre?: string; contacto?: string; leadId?: number } {
+    const parsedArgs = parseGuardarContactoArgs(args);
+    if (!parsedArgs) {
+      return { ok: false };
+    }
+
+    const data = ensureLeadData(session);
+    
+    // Update session data with contact info
+    if (parsedArgs.nombre) {
+      data.nombre = parsedArgs.nombre;
+    }
+    if (parsedArgs.contacto) {
+      data.contacto = parsedArgs.contacto;
+    }
+
+    // Update lead in database if it exists
+    const leadId = getLeadId(session);
+    if (leadId) {
+      leadService.updateLeadData(leadId, {
+        nombre: data.nombre,
+        contacto: data.contacto,
+      });
+    }
+
+    return {
+      ok: true,
+      nombre: parsedArgs.nombre,
+      contacto: parsedArgs.contacto,
+      leadId,
+    };
+  }
 }
 
 const toolExecutor = new ToolExecutor();
@@ -96,6 +133,16 @@ export function executeToolCalls(
           role: "tool",
           tool_call_id: tc.id,
           content: JSON.stringify({ results: result.properties }),
+        });
+        break;
+      }
+
+      case "guardarContactoLead": {
+        const result = toolExecutor.executeGuardarContacto(args, session, userId);
+        results.push({
+          role: "tool",
+          tool_call_id: tc.id,
+          content: JSON.stringify({ ok: result.ok, nombre: result.nombre, contacto: result.contacto }),
         });
         break;
       }

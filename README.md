@@ -10,6 +10,33 @@ Asistente virtual de inmobiliaria con integración de OpenAI y SQLite.
 - Handoff a asesor humano
 - Sesiones en memoria por userId
 
+## Arquitectura del Sistema
+
+```mermaid
+graph TD
+    %% Usuarios y Entrada
+    User((Cliente WhatsApp)) -->|Mensaje| Twilio[Twilio / Meta API]
+    Twilio -->|Webhook| NodeServer[Backend Node.js - Railway/VPS]
+
+    %% Procesamiento Core
+    subgraph "Core App (Docker Container)"
+        NodeServer <-->|Query/Insert| SQLite[(SQLite - app.db)]
+        NodeServer <-->|Búsqueda Semántica| OpenAI[OpenAI API - GPT-4o-mini]
+    end
+
+    %% Capa de Datos (Scraping)
+    Apify[Apify - Scraper Zonaprop] -->|JSON Results| N8N[n8n Orchestrator]
+    N8N -->|POST /sync| NodeServer
+
+    %% Automatizaciones y Notificaciones
+    NodeServer -->|Trigger Event| N8N
+    N8N -->|Email/WhatsApp| Agent((Agente Inmobiliario))
+    N8N -->|Push Data| CRM[CRM Inmobiliario / GSheets]
+
+    %% Capa de Persistencia (Volumen)
+    SQLite --- Vol[(Persistent Volume)]
+```
+
 ## Dataset
 
 Este proyecto utiliza el dataset de propiedades de Zonaprop Argentina proporcionado por [Luminati.io](https://github.com/luminati-io/Zonaprop-Argentina-dataset-samples).

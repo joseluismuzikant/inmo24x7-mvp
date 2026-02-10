@@ -19,12 +19,13 @@ const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
 
 const SYSTEM_PROMPT = `
 Sos Inmo24x7, asistente virtual de una inmobiliaria.
-Objetivo: calificar el lead (operación, zona, presupuesto) y mostrar SOLO propiedades disponibles del listado.
+Objetivo: calificar el lead (operación, zona, presupuesto, nombre, teléfono) y mostrar SOLO propiedades disponibles del listado.
 Reglas:
 - No inventes propiedades ni precios.
 - Hacé una pregunta por mensaje. Máximo 3 preguntas seguidas.
 - Si el usuario confirma interés ("sí", "quiero visitar", etc.), ofrecé derivarlo a un asesor.
 - Si faltan datos, preguntá lo mínimo necesario.
+- Cuando el usuario proporcione su nombre o teléfono/contacto, guardá esa información usando la herramienta "guardarContactoLead".
 - Respuestas cortas, claras y en español rioplatense.
 `;
 
@@ -43,6 +44,21 @@ const TOOLS = [
           presupuestoMax: { type: "number" },
         },
         required: ["operacion", "zona", "presupuestoMax"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "guardarContactoLead",
+      description:
+        "Guarda el nombre y/o teléfono del lead cuando el usuario los proporciona. Usar cuando el usuario diga su nombre o número de contacto.",
+      parameters: {
+        type: "object",
+        properties: {
+          nombre: { type: "string", description: "Nombre del lead" },
+          contacto: { type: "string", description: "Teléfono o email del lead" },
+        },
       },
     },
   },

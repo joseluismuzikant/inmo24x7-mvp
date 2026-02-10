@@ -48,6 +48,11 @@ export type DerivarAHumanoArgs = {
   summary: string;
 };
 
+export type GuardarContactoArgs = {
+  nombre?: string;
+  contacto?: string;
+};
+
 export function parseBuscarPropiedadesArgs(args: unknown): BuscarPropiedadesArgs | null {
   if (!args || typeof args !== "object") return null;
   const a = args as Record<string, unknown>;
@@ -74,4 +79,21 @@ export function parseDerivarAHumanoArgs(args: unknown): DerivarAHumanoArgs | nul
     return { summary: a.summary };
   }
   return null;
+}
+
+export function parseGuardarContactoArgs(args: unknown): GuardarContactoArgs | null {
+  if (!args || typeof args !== "object") return null;
+  const a = args as Record<string, unknown>;
+  
+  const result: GuardarContactoArgs = {};
+  
+  if (typeof a.nombre === "string" && a.nombre.trim()) {
+    result.nombre = a.nombre.trim();
+  }
+  
+  if (typeof a.contacto === "string" && a.contacto.trim()) {
+    result.contacto = a.contacto.trim();
+  }
+  
+  return Object.keys(result).length > 0 ? result : null;
 }
