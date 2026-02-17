@@ -1,5 +1,5 @@
-import { openai } from "./openaiClient";
-import { resetSession } from "./sessionStore";
+import { openai } from "./openaiClient.js";
+import { resetSession } from "./sessionStore.js";
 
 import {
   loadSession,
@@ -9,10 +9,10 @@ import {
   setLeadId,
   addMessageToHistory,
   getHistory,
-} from "./sessionService";
-import { leadService } from "./leadService";
-import { hasToolCalls, parseToolCalls } from "./toolParser";
-import { executeToolCalls, type ToolResult } from "./toolHandler";
+} from "./sessionService.js";
+import { leadService } from "./leadService.js";
+import { hasToolCalls, parseToolCalls } from "./toolParser.js";
+import { executeToolCalls, type ToolResult } from "./toolHandler.js";
 import type { BotReply, ChatMsg, SessionState } from "../types/types";
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";

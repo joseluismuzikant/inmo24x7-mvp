@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { listLeads, getLeadById } from "../repositories/leadRepo";
+import { listLeads, getLeadById } from "../repositories/leadRepo.js";
 
 export const adminRouter = Router();
 

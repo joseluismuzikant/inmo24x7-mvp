@@ -1,7 +1,7 @@
-import { searchProperties } from "./propertyService";
-import { leadService } from "./leadService";
-import { ensureLeadData, getLeadId, setLeadId } from "./sessionService";
-import { parseBuscarPropiedadesArgs, parseDerivarAHumanoArgs, parseGuardarContactoArgs } from "./toolParser";
+import { searchProperties } from "./propertyService.js";
+import { leadService } from "./leadService.js";
+import { ensureLeadData, getLeadId, setLeadId } from "./sessionService.js";
+import { parseBuscarPropiedadesArgs, parseDerivarAHumanoArgs, parseGuardarContactoArgs } from "./toolParser.js";
 import type { SessionState, Property } from "../types/types";
 
 export interface ToolResult {

@@ -1,5 +1,5 @@
-import type { ChatMsg, SessionState } from "../types/types";
-import { getSession, setSession } from "./sessionStore";
+import type { ChatMsg, SessionState } from "../types/types.js";
+import { getSession, setSession } from "./sessionStore.js";
 
 const MAX_HISTORY = 10;
 

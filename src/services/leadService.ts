@@ -1,5 +1,5 @@
-import { createLead, updateLead, getLeadByUserId, type Lead } from "../repositories/leadRepo";
-import type { LeadData } from "./sessionService";
+import { createLead, updateLead, getLeadByUserId, type Lead } from "../repositories/leadRepo.js";
+import type { LeadData } from "./sessionService.js";
 
 export class LeadService {
   loadOrCreateLead(userId: string, sessionData: LeadData, sessionLeadId?: number): number | undefined {

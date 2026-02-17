@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { SessionState, Operation } from "../types/types";
-import type { LeadData } from "./sessionService";
+import type { LeadData } from "./sessionService.js";
 
 const ToolCallSchema = z.object({
   id: z.string(),
