@@ -94,7 +94,33 @@ npm run dev
 |---------|-------------|
 | `/reset` | Reinicia la conversación actual y limpia la sesión del usuario |
 
+## Documentación API
+
+La API cuenta con documentación interactiva generada automáticamente con Swagger UI.
+
+### Acceder a la documentación
+
+Una vez iniciado el servidor, visita:
+
+📚 **http://localhost:3000/api-docs**
+
+La documentación incluye:
+- Descripción de todos los endpoints
+- Schemas de request/response
+- Prueba interactiva de endpoints
+- Autenticación Bearer token
+
 ## Endpoints API
+
+### Autenticación
+
+La mayoría de los endpoints requieren autenticación mediante Bearer token en el header:
+
+```http
+Authorization: Bearer <tu_token>
+```
+
+> **Nota:** El token de autorización se configura en la variable de entorno `AUTH_TOKEN`.
 
 ### Health Check
 
@@ -324,6 +350,8 @@ SUPABASE_ANON_KEY=tu-anon-key
 src/
 ├── index.ts              # Entry point
 ├── db.ts                 # Configuración SQLite
+├── config/
+│   └── swagger.ts        # Configuración de Swagger/OpenAPI
 ├── services/
 │   ├── botService.ts     # Lógica del chatbot
 │   ├── leadService.ts    # Gestión de leads
@@ -337,7 +365,10 @@ src/
 │   └── leadRepo.ts       # Acceso a datos de leads
 ├── routes/
 │   ├── message.ts        # Rutas de mensajes
-│   └── leads.ts          # Rutas de leads
+│   ├── leads.ts          # Rutas de leads
+│   └── admin.ts          # Panel de administración
+├── middleware/
+│   └── auth.ts           # Middleware de autenticación
 ├── types/
 │   └── types.ts          # Tipos TypeScript
 └── public/

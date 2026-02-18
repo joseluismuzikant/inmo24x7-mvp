@@ -3,7 +3,32 @@ import { getAllLeads, getLeadById, deleteLead } from "../repositories/leadRepo.j
 
 const router = Router();
 
-// Get all leads
+/**
+ * @swagger
+ * /api/leads:
+ *   get:
+ *     summary: Get all leads
+ *     description: Retrieve a list of all captured leads
+ *     tags: [Leads]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of leads retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 leads:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Lead'
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Server error
+ */
 router.get("/api/leads", (_req, res) => {
   try {
     const leads = getAllLeads();
@@ -13,7 +38,41 @@ router.get("/api/leads", (_req, res) => {
   }
 });
 
-// Get lead by ID
+/**
+ * @swagger
+ * /api/leads/{id}:
+ *   get:
+ *     summary: Get a lead by ID
+ *     description: Retrieve a specific lead by its unique identifier
+ *     tags: [Leads]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Lead ID
+ *     responses:
+ *       200:
+ *         description: Lead retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lead:
+ *                   $ref: '#/components/schemas/Lead'
+ *       400:
+ *         description: Invalid lead ID format
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       404:
+ *         description: Lead not found
+ *       500:
+ *         description: Server error
+ */
 router.get("/api/leads/:id", (req, res) => {
   try {
     const leadId = Number(req.params.id);
@@ -32,7 +91,39 @@ router.get("/api/leads/:id", (req, res) => {
   }
 });
 
-// Delete lead
+/**
+ * @swagger
+ * /api/leads/{id}:
+ *   delete:
+ *     summary: Delete a lead
+ *     description: Delete a lead by its unique identifier
+ *     tags: [Leads]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Lead ID
+ *     responses:
+ *       200:
+ *         description: Lead deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *       400:
+ *         description: Invalid lead ID format
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Server error
+ */
 router.delete("/api/leads/:id", (req, res) => {
   try {
     const leadId = Number(req.params.id);
