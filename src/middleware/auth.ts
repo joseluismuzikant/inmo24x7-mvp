@@ -21,6 +21,7 @@ export interface AuthenticatedRequest extends Request {
     id: string;
     email?: string;
     tenant_id?: string;
+    role?: string;
     source_type?: SourceType;
     [key: string]: any;
   };
@@ -74,16 +75,35 @@ export async function authMiddleware(
       return;
     }
 
-    // Extract tenant_id and source_type from user metadata (JWT claims)
+    // Query profiles table to get tenant_id and role
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('tenant_id, role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error(`No profile found for user ${user.id}:`, profileError);
+      res.status(403).json({ error: "Forbidden - No profile found" });
+      return;
+    }
+
+    if (!profile.tenant_id) {
+      console.error(`No tenant_id found for user ${user.id}`);
+      res.status(403).json({ error: "Forbidden - No tenant assigned" });
+      return;
+    }
+
+    // Extract source_type from user metadata (or default to 'web_chat')
     const metadata = user.user_metadata || {};
     const appMetadata = user.app_metadata || {};
 
     req.user = {
       id: user.id,
       email: user.email,
-      tenant_id: metadata.tenant_id || appMetadata.tenant_id,
+      tenant_id: profile.tenant_id,
+      role: profile.role,
       source_type: metadata.source_type || appMetadata.source_type || 'web_chat',
-      ...metadata,
     };
 
     next();
