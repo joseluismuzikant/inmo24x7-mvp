@@ -29,31 +29,20 @@ class ToolExecutor {
   ): Promise<{ results: Property[]; allWithinBudget: boolean; suggestedBudget?: number; leadId?: number }> {
     const parsedArgs = parseBuscarPropiedadesArgs(args);
     if (!parsedArgs) {
-      console.log("⚠️ buscarPropiedades: Invalid arguments");
       return { results: [], allWithinBudget: true };
     }
-
-    console.log(`🔍 Searching: ${parsedArgs.operacion} in ${parsedArgs.zona} up to $${parsedArgs.presupuestoMax}`);
 
     const data = ensureLeadData(session);
     data.operacion = parsedArgs.operacion;
     data.zona = parsedArgs.zona;
     data.presupuestoMax = parsedArgs.presupuestoMax;
 
-    // Search properties
     const searchResult = await searchProperties({
       operacion: parsedArgs.operacion,
       zona: parsedArgs.zona,
       presupuestoMax: parsedArgs.presupuestoMax,
       limit: 10,
     });
-
-    console.log(`✅ Search results: ${searchResult.results.length} properties, ${searchResult.propertiesWithinBudget} within budget`);
-    if (searchResult.results.length > 0) {
-      searchResult.results.forEach((p, i) => {
-        console.log(`  ${i + 1}. ${p.titulo?.substring(0, 40)}... - $${p.precio} - Link: ${p.link?.substring(0, 50)}...`);
-      });
-    }
 
     // Create or update lead in background
     const leadId = await leadService.loadOrCreateLead(visitorId, tenantId, sourceType, data, getLeadId(session));

@@ -20,6 +20,19 @@ function money(v: any) {
   return n.toLocaleString("es-AR");
 }
 
+function formatDate(v: any) {
+  if (!v) return "";
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return String(v);
+  return d.toLocaleString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 /* =========================
    LISTA DE LEADS
 ========================= */
@@ -31,7 +44,7 @@ adminRouter.get("/admin/leads", async (_req, res) => {
     .map((l: any) => `
       <tr>
         <td><a href="/admin/leads/${l.id}">${l.id}</a></td>
-        <td>${esc(l.created_at)}</td>
+        <td>${formatDate(l.created_at)}</td>
         <td>${esc(l.operacion)}</td>
         <td>${esc(l.zona)}</td>
         <td style="text-align:right">${money(l.presupuesto_max)}</td>
@@ -172,7 +185,7 @@ adminRouter.get("/admin/leads/:id", async (req, res) => {
   <h1>Lead #${id}</h1>
 
   <div class="box">
-    <div class="k">Fecha</div><div class="v">${esc(lead.created_at)}</div>
+    <div class="k">Fecha</div><div class="v">${formatDate(lead.created_at)}</div>
     <div class="k">Operación</div><div class="v">${esc(lead.operacion)}</div>
     <div class="k">Zona</div><div class="v">${esc(lead.zona)}</div>
     <div class="k">Presupuesto</div><div class="v">${money(lead.presupuesto_max)}</div>

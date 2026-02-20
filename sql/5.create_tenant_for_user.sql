@@ -30,6 +30,17 @@ after insert on auth.users
 for each row execute function public.handle_new_user_create_tenant();
 
 
+create table if not exists public.profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  tenant_id uuid not null references public.tenants(id) on delete cascade,
+  role text not null default 'owner' check (role in ('owner','admin','agent')),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists profiles_tenant_idx on public.profiles(tenant_id);
+
+
+
 insert into public.profiles (user_id, tenant_id, role)
 select
   u.id as user_id,
