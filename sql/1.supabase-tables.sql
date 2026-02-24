@@ -1,6 +1,40 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.leads (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  tenant_id uuid NOT NULL,
+  visitor_id text NOT NULL,
+  source_type text NOT NULL DEFAULT 'web_chat'::text CHECK (source_type = ANY (ARRAY['web_chat'::text, 'whatsapp'::text, 'form'::text, 'backoffice'::text])),
+  operacion text CHECK (operacion = ANY (ARRAY['venta'::text, 'alquiler'::text])),
+  zona text,
+  presupuesto_max numeric CHECK (presupuesto_max >= 0::numeric),
+  nombre text,
+  contacto text,
+  summary text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT leads_pkey PRIMARY KEY (id),
+  CONSTRAINT leads_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id)
+);
+CREATE TABLE public.profiles (
+  user_id uuid NOT NULL,
+  tenant_id uuid NOT NULL,
+  role text NOT NULL DEFAULT 'owner'::text CHECK (role = ANY (ARRAY['owner'::text, 'admin'::text, 'agent'::text])),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
+  CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT profiles_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id)
+);
+CREATE TABLE public.tenants (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  slug text NOT NULL UNIQUE,
+  status text NOT NULL DEFAULT 'active'::text CHECK (status = ANY (ARRAY['active'::text, 'disabled'::text])),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT tenants_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.zp_posting_pictures (
   id bigint NOT NULL DEFAULT nextval('zp_posting_pictures_id_seq'::regclass),
   posting_id text NOT NULL,
@@ -11,8 +45,10 @@ CREATE TABLE public.zp_posting_pictures (
   width integer,
   height integer,
   multimedia_type_id text,
+  tenant_id uuid,
   CONSTRAINT zp_posting_pictures_pkey PRIMARY KEY (id),
-  CONSTRAINT zp_posting_pictures_posting_id_fkey FOREIGN KEY (posting_id) REFERENCES public.zp_postings(id)
+  CONSTRAINT zp_posting_pictures_posting_id_fkey FOREIGN KEY (posting_id) REFERENCES public.zp_postings(id),
+  CONSTRAINT zp_posting_pictures_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id)
 );
 CREATE TABLE public.zp_postings (
   id text NOT NULL,
@@ -56,5 +92,7 @@ CREATE TABLE public.zp_postings (
   highlighted_features jsonb,
   flags_features jsonb,
   raw_json jsonb NOT NULL,
-  CONSTRAINT zp_postings_pkey PRIMARY KEY (id)
+  tenant_id uuid NOT NULL,
+  CONSTRAINT zp_postings_pkey PRIMARY KEY (id),
+  CONSTRAINT zp_postings_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id)
 );
