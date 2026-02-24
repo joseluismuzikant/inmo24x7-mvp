@@ -13,41 +13,22 @@ export interface AuthUser {
 export async function getAuthUser(token: string): Promise<AuthUser> {
   const supabase = getSupabaseClient();
 
-  console.log("🔍 getAuthUser called with token:", token.substring(0, 20) + "...");
-
   const {
     data: { user },
     error,
   } = await supabase.auth.getUser(token);
-
-  console.log("🔍 getAuthUser user:", user);
-  console.log("🔍 getAuthUser error:", error);
 
   if (error || !user) {
     throw new Error("Invalid token");
   }
 
   const userId = user.id;
-  console.log("🔍 getAuthUser userId:", userId);
 
-  // Debug: Check all profiles
-  const { data: allProfiles, error: allProfilesError } = await supabase
-    .from('profiles')
-    .select('*')
-    .limit(5);
-
-  console.log("🔍 All profiles (debug):", allProfiles);
-  console.log("🔍 All profiles error:", allProfilesError);
-
-  // Try direct query with explicit UUID string
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('tenant_id, role')
     .eq('user_id', userId)
     .single();
-
-  console.log("🔍 getAuthUser profile:", profile);
-  console.log("🔍 getAuthUser profileError:", profileError);
 
   if (profileError || !profile) {
     throw new Error("No profile found");

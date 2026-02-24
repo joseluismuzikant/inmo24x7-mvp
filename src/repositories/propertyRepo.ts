@@ -1,7 +1,7 @@
 import { Property, Operation } from "../types/types.js";
 import { getSupabaseClient } from "../lib/supabase.js";
 
-let propertiesCache: Property[] | null = null;
+const propertiesCacheByTenant = new Map<string, Property[]>();
 
 function parseOperacion(operationType: string): Operation | null {
   const normalized = operationType.toLowerCase().trim();
@@ -11,8 +11,8 @@ function parseOperacion(operationType: string): Operation | null {
 }
 
 export async function loadPropertiesDB(tenant_id: string): Promise<Property[]> {
-  if (propertiesCache) {
-    return propertiesCache;
+  if (propertiesCacheByTenant.has(tenant_id)) {
+    return propertiesCacheByTenant.get(tenant_id)!;
   }
 
   const client = getSupabaseClient();
@@ -40,7 +40,8 @@ export async function loadPropertiesDB(tenant_id: string): Promise<Property[]> {
       whatsapp,
       main_features,
       general_features
-    `);
+    `)
+    .eq("tenant_id", tenant_id);
 
   if (error) {
     console.error("❌ Error fetching from Supabase:", error);
@@ -99,8 +100,8 @@ export async function loadPropertiesDB(tenant_id: string): Promise<Property[]> {
     })
     .filter((p): p is Property => p !== null);
 
-  propertiesCache = properties;
-  console.log(`✅ Loaded ${properties.length} properties from Supabase`);
+  propertiesCacheByTenant.set(tenant_id, properties);
+  console.log(`✅ Loaded ${properties.length} properties from Supabase for tenant ${tenant_id}`);
   return properties;
 }
 
@@ -112,7 +113,7 @@ export async function searchPropertiesInSupabase(args: {
 }): Promise<Property[]> {
   const { tenant_id, operacion, zona, limit = 10 } = args;
   
-  console.log(`🔍 Searching Supabase: operacion=${operacion}, zona=${zona}`);
+  console.log(`🔍 Searching Supabase: tenant=${tenant_id}, operacion=${operacion}, zona=${zona}`);
   const client = getSupabaseClient();
   
   // Query with filters at database level
@@ -140,6 +141,7 @@ export async function searchPropertiesInSupabase(args: {
       main_features,
       general_features
     `)
+    .eq("tenant_id", tenant_id)
     .eq("location_name", zona)
     .eq("operation_type", operacion.charAt(0).toUpperCase() + operacion.slice(1))
     .limit(limit);
@@ -183,6 +185,7 @@ export async function searchPropertiesInSupabase(args: {
         main_features,
         general_features
       `)
+      .eq("tenant_id", tenant_id)
       .ilike("location_name", `%${zona}%`)
       .ilike("operation_type", `%${operacion}%`)
       .limit(limit);
@@ -244,10 +247,14 @@ function mapPostingToProperty(posting: any): Property | null {
   };
 }
 
-export function clearPropertiesCache(): void {
-  propertiesCache = null;
+export function clearPropertiesCache(tenant_id?: string): void {
+  if (tenant_id) {
+    propertiesCacheByTenant.delete(tenant_id);
+  } else {
+    propertiesCacheByTenant.clear();
+  }
 }
 
-export function getPropertiesCount(): number {
-  return propertiesCache?.length || 0;
+export function getPropertiesCount(tenant_id: string): number {
+  return propertiesCacheByTenant.get(tenant_id)?.length || 0;
 }
