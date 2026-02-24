@@ -82,7 +82,7 @@ jobs:
             # Validar env file en droplet
             if [ ! -f "$ENV_FILE" ]; then
               echo "ERROR: No existe el env file en el droplet: $ENV_FILE"
-              echo "Crealo con PORT, OPENAI_API_KEY, OPENAI_MODEL, PROPERTY_LOADER, SUPABASE_URL, SUPABASE_ANON_KEY"
+              echo "Crealo con PORT, OPENAI_API_KEY, OPENAI_MODEL, PROPERTY_LOADER, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY"
               exit 1
             fi
 

@@ -1,22 +1,7 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Property, Operation } from "../types/types.js";
+import { getSupabaseClient } from "../lib/supabase.js";
 
-let supabase: SupabaseClient | null = null;
 let propertiesCache: Property[] | null = null;
-
-function getSupabaseClient(): SupabaseClient {
-  if (!supabase) {
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_ANON_KEY;
-    
-    if (!url || !key) {
-      throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY must be set in environment");
-    }
-    
-    supabase = createClient(url, key);
-  }
-  return supabase;
-}
 
 function parseOperacion(operationType: string): Operation | null {
   const normalized = operationType.toLowerCase().trim();
@@ -25,7 +10,7 @@ function parseOperacion(operationType: string): Operation | null {
   return null;
 }
 
-export async function loadPropertiesFromSupabase(): Promise<Property[]> {
+export async function loadPropertiesDB(tenant_id: string): Promise<Property[]> {
   if (propertiesCache) {
     return propertiesCache;
   }
@@ -120,11 +105,12 @@ export async function loadPropertiesFromSupabase(): Promise<Property[]> {
 }
 
 export async function searchPropertiesInSupabase(args: {
+  tenant_id: string;
   operacion: Operation;
   zona: string;
   limit?: number;
 }): Promise<Property[]> {
-  const { operacion, zona, limit = 10 } = args;
+  const { tenant_id, operacion, zona, limit = 10 } = args;
   
   console.log(`🔍 Searching Supabase: operacion=${operacion}, zona=${zona}`);
   const client = getSupabaseClient();
@@ -155,13 +141,13 @@ export async function searchPropertiesInSupabase(args: {
       general_features
     `)
     .eq("location_name", zona)
-    .eq("operation_type", operacion.charAt(0).toUpperCase() + operacion.slice(1)) // Capitalize: "alquiler" -> "Alquiler"
+    .eq("operation_type", operacion.charAt(0).toUpperCase() + operacion.slice(1))
     .limit(limit);
 
   if (error) {
     console.error("❌ Error querying Supabase:", error);
     // Fallback to in-memory search
-    const allProps = await loadPropertiesFromSupabase();
+    const allProps = await loadPropertiesDB(tenant_id);
     return allProps.filter(p => 
       p.operacion === operacion && 
       p.zona.toLowerCase() === zona.toLowerCase()

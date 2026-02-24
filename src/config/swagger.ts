@@ -30,20 +30,28 @@ const options = {
               type: "integer",
               description: "Unique identifier for the lead",
             },
-            createdAt: {
+            tenant_id: {
               type: "string",
-              format: "date-time",
-              description: "When the lead was created",
+              description: "Tenant identifier",
+            },
+            visitor_id: {
+              type: "string",
+              description: "Visitor session identifier",
+            },
+            source_type: {
+              type: "string",
+              enum: ["web_chat", "whatsapp", "form", "backoffice"],
+              description: "Source of the lead",
             },
             operacion: {
               type: "string",
-              description: "Type of operation (e.g., compra, alquiler)",
+              description: "Type of operation (venta, alquiler)",
             },
             zona: {
               type: "string",
               description: "Target zone/area",
             },
-            presupuestoMax: {
+            presupuesto_max: {
               type: "number",
               description: "Maximum budget",
             },
@@ -58,6 +66,16 @@ const options = {
             summary: {
               type: "string",
               description: "Summary of the lead conversation",
+            },
+            created_at: {
+              type: "string",
+              format: "date-time",
+              description: "When the lead was created",
+            },
+            updated_at: {
+              type: "string",
+              format: "date-time",
+              description: "When the lead was last updated",
             },
           },
         },

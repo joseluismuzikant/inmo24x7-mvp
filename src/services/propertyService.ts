@@ -1,7 +1,7 @@
 import { Property, Operation } from "../types/types.js";
 import { loadPropertiesFromCSV } from "./propertyLoader.js";
 import { loadPropertiesFromJson } from "./propertyLoader.js";
-import { loadPropertiesFromSupabase, searchPropertiesInSupabase } from "./propertyLoaderSupabase.js";
+import { loadPropertiesDB, searchPropertiesInSupabase } from "../repositories/propertyRepo.js";
 
 type LoaderType = "csv" | "json" | "supabase";
 
@@ -19,12 +19,13 @@ export interface SearchResult {
 }
 
 export async function searchProperties(args: {
+  tenant_id: string;
   operacion: Operation;
   zona: string;
   presupuestoMax: number;
   limit?: number;
 }): Promise<SearchResult> {
-  const { operacion, zona, presupuestoMax, limit = 10 } = args;
+  const { tenant_id, operacion, zona, presupuestoMax, limit = 10 } = args;
   
   console.log(`🔍 searchProperties: ${operacion} in ${zona}, budget $${presupuestoMax}`);
   
@@ -33,7 +34,7 @@ export async function searchProperties(args: {
   
   if (loaderType === "supabase") {
     // Use database-level filtering for Supabase
-    properties = await searchPropertiesInSupabase({ operacion, zona, limit });
+    properties = await searchPropertiesInSupabase({ tenant_id, operacion, zona, limit });
   } else {
     // Use in-memory filtering for CSV/JSON
     const allProperties = loaderType === "json" 

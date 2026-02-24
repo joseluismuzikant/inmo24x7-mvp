@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { getAllLeads, getLeadById, deleteLead } from "../repositories/leadRepo.js";
+import { type AuthenticatedRequest } from "../middleware/auth.js";
+import { requireTenantId, requireLeadId } from "../services/userService.js";
 
 const router = Router();
 
@@ -29,11 +31,15 @@ const router = Router();
  *       500:
  *         description: Server error
  */
-router.get("/api/leads", async (_req, res) => {
+router.get("/api/leads", async (req: AuthenticatedRequest, res) => {
   try {
-    const leads = await getAllLeads();
+    const tenant_id = requireTenantId(req);
+    const leads = await getAllLeads(tenant_id);
     res.json({ leads });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message?.includes("Unauthorized")) {
+      return res.status(401).json({ error: error.message });
+    }
     console.error("Error fetching leads:", error);
     res.status(500).json({ error: "Failed to fetch leads" });
   }
@@ -74,20 +80,21 @@ router.get("/api/leads", async (_req, res) => {
  *       500:
  *         description: Server error
  */
-router.get("/api/leads/:id", async (req, res) => {
+router.get("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
   try {
-    const leadId = Number(req.params.id);
-    if (isNaN(leadId)) {
-      return res.status(400).json({ error: "Invalid lead ID" });
-    }
+    const tenant_id = requireTenantId(req);
+    const leadId = requireLeadId(req);
 
-    const lead = await getLeadById(leadId);
+    const lead = await getLeadById(leadId, tenant_id);
     if (!lead) {
       return res.status(404).json({ error: "Lead not found" });
     }
 
     res.json({ lead });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message?.includes("Unauthorized") || error.message?.includes("Invalid")) {
+      return res.status(error.message.includes("Unauthorized") ? 401 : 400).json({ error: error.message });
+    }
     console.error("Error fetching lead:", error);
     res.status(500).json({ error: "Failed to fetch lead" });
   }
@@ -126,16 +133,17 @@ router.get("/api/leads/:id", async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.delete("/api/leads/:id", async (req, res) => {
+router.delete("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
   try {
-    const leadId = Number(req.params.id);
-    if (isNaN(leadId)) {
-      return res.status(400).json({ error: "Invalid lead ID" });
-    }
+    const tenant_id = requireTenantId(req);
+    const leadId = requireLeadId(req);
 
-    await deleteLead(leadId);
+    await deleteLead(leadId, tenant_id);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message?.includes("Unauthorized") || error.message?.includes("Invalid")) {
+      return res.status(error.message.includes("Unauthorized") ? 401 : 400).json({ error: error.message });
+    }
     console.error("Error deleting lead:", error);
     res.status(500).json({ error: "Failed to delete lead" });
   }

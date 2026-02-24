@@ -2,6 +2,35 @@ export type Operation = "venta" | "alquiler";
 
 export type SourceType = 'web_chat' | 'whatsapp' | 'form' | 'backoffice';
 
+export type Lead = {
+  id: number;
+  tenant_id: string;
+  visitor_id: string;
+  source_type: SourceType;
+  operacion: string | null;
+  zona: string | null;
+  presupuesto_max: number | null;
+  nombre: string | null;
+  contacto: string | null;
+  summary: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CreateLeadInput = {
+  tenant_id: string;
+  visitor_id: string;
+  source_type: SourceType;
+  operacion?: "venta" | "alquiler";
+  zona?: string;
+  presupuesto_max?: number;
+  nombre?: string;
+  contacto?: string;
+  summary?: string;
+};
+
+export type UpdateLeadInput = Partial<Omit<CreateLeadInput, "tenant_id" | "visitor_id" | "source_type">>;
+
 export type Property = {
   // Identificación
   id: string;

@@ -11,8 +11,6 @@ const MessageSchema = z.object({
   text: z.string().min(1)
 });
 
-// Default values for local development
-const DEFAULT_TENANT_ID = process.env.DEFAULT_TENANT_ID || '00000000-0000-0000-0000-000000000001';
 const DEFAULT_SOURCE_TYPE: SourceType = (process.env.DEFAULT_SOURCE_TYPE as SourceType) || 'web_chat';
 
 /**
@@ -60,20 +58,13 @@ messageRouter.post("/message", async (req: AuthenticatedRequest, res) => {
 
     const { userId, text } = parsed.data;
     
-    // Check if auth is required
-    if (process.env.REQUIRE_AUTH === 'true' && !req.user?.tenant_id) {
-      return res.status(401).json({ error: "Unauthorized - Authentication required" });
+    // Get tenant and source from auth token
+    const tenantId = req.user?.tenant_id;
+    if (!tenantId) {
+      return res.status(401).json({ error: "Unauthorized - No tenant_id" });
     }
-    
-    // Get tenant and source from auth token, or use defaults for local dev
-    const tenantId = req.user?.tenant_id || DEFAULT_TENANT_ID;
-    console.log(`Received message from userId: ${userId}, tenantId: ${tenantId}`); // Debug log 
+    console.log(`Received message from userId: ${userId}, tenantId: ${tenantId}`);
     const sourceType = req.user?.source_type || DEFAULT_SOURCE_TYPE;
-    
-    // Log if using defaults (helpful for debugging)
-    if (!req.user?.tenant_id) {
-      console.log(`⚠️ Using default tenant_id: ${tenantId} (auth token missing tenant_id)`);
-    }
 
     const reply = await botReply({ 
       userId, 

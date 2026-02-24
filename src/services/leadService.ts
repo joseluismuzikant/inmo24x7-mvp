@@ -35,7 +35,7 @@ export class LeadService {
     return undefined;
   }
 
-  async updateLeadData(leadId: number, data: Partial<LeadData>, summary?: string): Promise<void> {
+  async updateLeadData(leadId: number, tenant_id: string, data: Partial<LeadData>, summary?: string): Promise<void> {
     console.log("📝 updateLeadData called with leadId:", leadId, "data:", data);
     const updateData: Record<string, any> = {};
     if (data.operacion !== undefined) updateData.operacion = data.operacion;
@@ -47,7 +47,7 @@ export class LeadService {
       updateData.summary = summary;
     }
     console.log("📝 updateLeadData updateData:", updateData);
-    await updateLead(leadId, updateData);
+    await updateLead(leadId, tenant_id, updateData);
   }
 
   private canCreateLead(data: LeadData): boolean {

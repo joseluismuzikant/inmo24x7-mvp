@@ -1,11 +1,14 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { type Lead, type CreateLeadInput, type UpdateLeadInput, type SourceType } from "../types/types.js";
+
+export { type Lead, type CreateLeadInput, type UpdateLeadInput, type SourceType };
 
 let supabase: SupabaseClient | null = null;
 
 function getSupabaseClient(): SupabaseClient {
   if (!supabase) {
     const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_ANON_KEY;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     if (!url || !key) {
       throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY must be set in environment");
@@ -15,37 +18,6 @@ function getSupabaseClient(): SupabaseClient {
   }
   return supabase;
 }
-
-export type SourceType = 'web_chat' | 'whatsapp' | 'form' | 'backoffice';
-
-export type Lead = {
-  id: number;
-  tenant_id: string;
-  visitor_id: string;
-  source_type: SourceType;
-  operacion: string | null;
-  zona: string | null;
-  presupuesto_max: number | null;
-  nombre: string | null;
-  contacto: string | null;
-  summary: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type CreateLeadInput = {
-  tenant_id: string;
-  visitor_id: string;
-  source_type: SourceType;
-  operacion?: "venta" | "alquiler";
-  zona?: string;
-  presupuesto_max?: number;
-  nombre?: string;
-  contacto?: string;
-  summary?: string;
-};
-
-export type UpdateLeadInput = Partial<Omit<CreateLeadInput, "tenant_id" | "visitor_id" | "source_type">>;
 
 export async function createLead(input: CreateLeadInput): Promise<number> {
   console.log("📝 createLead input:", input);
@@ -77,7 +49,7 @@ export async function createLead(input: CreateLeadInput): Promise<number> {
   return data.id;
 }
 
-export async function updateLead(leadId: number, patch: UpdateLeadInput): Promise<void> {
+export async function updateLead(leadId: number, tenant_id: string, patch: UpdateLeadInput): Promise<void> {
   console.log("📝 updateLead called with leadId:", leadId, "patch:", patch);
   const client = getSupabaseClient();
   
@@ -97,44 +69,24 @@ export async function updateLead(leadId: number, patch: UpdateLeadInput): Promis
   const { error } = await client
     .from("leads")
     .update(updateData)
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .eq("tenant_id", tenant_id);
 
   if (error) {
     throw new Error(`Failed to update lead: ${error.message}`);
   }
 }
 
-export async function getLeadByVisitorId(visitorId: string, tenant_id?: string): Promise<Lead | null> {
-  const client = getSupabaseClient();
-  
-  let query = client
-    .from("leads")
-    .select("*")
-    .eq("visitor_id", visitorId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-  
-  if (tenant_id) {
-    query = query.eq("tenant_id", tenant_id);
-  }
-  
-  const { data, error } = await query.single();
-
-  if (error) {
-    if (error.code === "PGRST116") return null;
-    throw new Error(`Failed to get lead: ${error.message}`);
-  }
-
-  return data;
-}
-
-export async function getLeadById(leadId: number): Promise<Lead | null> {
+export async function getLeadByVisitorId(visitorId: string, tenant_id: string): Promise<Lead | null> {
   const client = getSupabaseClient();
   
   const { data, error } = await client
     .from("leads")
     .select("*")
-    .eq("id", leadId)
+    .eq("visitor_id", visitorId)
+    .eq("tenant_id", tenant_id)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .single();
 
   if (error) {
@@ -145,19 +97,32 @@ export async function getLeadById(leadId: number): Promise<Lead | null> {
   return data;
 }
 
-export async function getAllLeads(tenant_id?: string): Promise<Lead[]> {
+export async function getLeadById(leadId: number, tenant_id: string): Promise<Lead | null> {
   const client = getSupabaseClient();
   
-  let query = client
+  const { data, error } = await client
     .from("leads")
     .select("*")
-    .order("created_at", { ascending: false });
-  
-  if (tenant_id) {
-    query = query.eq("tenant_id", tenant_id);
+    .eq("id", leadId)
+    .eq("tenant_id", tenant_id)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw new Error(`Failed to get lead: ${error.message}`);
   }
+
+  return data;
+}
+
+export async function getAllLeads(tenant_id: string): Promise<Lead[]> {
+  const client = getSupabaseClient();
   
-  const { data, error } = await query;
+  const { data, error } = await client
+    .from("leads")
+    .select("*")
+    .eq("tenant_id", tenant_id)
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to get leads: ${error.message}`);
@@ -166,33 +131,29 @@ export async function getAllLeads(tenant_id?: string): Promise<Lead[]> {
   return data || [];
 }
 
-export async function deleteLead(leadId: number): Promise<void> {
+export async function deleteLead(leadId: number, tenant_id: string): Promise<void> {
   const client = getSupabaseClient();
   
   const { error } = await client
     .from("leads")
     .delete()
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .eq("tenant_id", tenant_id);
 
   if (error) {
     throw new Error(`Failed to delete lead: ${error.message}`);
   }
 }
 
-export async function listLeads(limit = 50, tenant_id?: string): Promise<Lead[]> {
+export async function listLeads(tenant_id: string, limit = 50): Promise<Lead[]> {
   const client = getSupabaseClient();
   
-  let query = client
+  const { data, error } = await client
     .from("leads")
     .select("*")
+    .eq("tenant_id", tenant_id)
     .order("created_at", { ascending: false })
     .limit(limit);
-  
-  if (tenant_id) {
-    query = query.eq("tenant_id", tenant_id);
-  }
-  
-  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to list leads: ${error.message}`);
@@ -202,24 +163,19 @@ export async function listLeads(limit = 50, tenant_id?: string): Promise<Lead[]>
 }
 
 export async function listLeadsBySourceType(
+  tenant_id: string,
   sourceType: SourceType, 
-  limit = 50, 
-  tenant_id?: string
+  limit = 50
 ): Promise<Lead[]> {
   const client = getSupabaseClient();
   
-  let query = client
+  const { data, error } = await client
     .from("leads")
     .select("*")
+    .eq("tenant_id", tenant_id)
     .eq("source_type", sourceType)
     .order("created_at", { ascending: false })
     .limit(limit);
-  
-  if (tenant_id) {
-    query = query.eq("tenant_id", tenant_id);
-  }
-  
-  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to list leads by source: ${error.message}`);

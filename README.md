@@ -64,7 +64,7 @@ Para usar Supabase como fuente de datos:
 ```env
 PROPERTY_LOADER=supabase
 SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_ANON_KEY=tu-anon-key
+SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
 ```
 
 2. Asegúrate de tener las tablas `zp_postings` y `zp_posting_pictures` en Supabase
@@ -265,7 +265,6 @@ Sirve la interfaz web de chat desde `src/public/index.html`
 | `npm run dev` | Inicia el servidor en modo desarrollo con hot reload |
 | `npm run build` | Compila TypeScript a JavaScript |
 | `npm start` | Ejecuta el servidor compilado |
-| `npm run db:init` | Inicializa la base de datos SQLite |
 
 ## Docker
 
@@ -341,7 +340,7 @@ PROPERTY_LOADER=csv        # opciones: csv | json | supabase (default: csv)
 
 # Supabase Configuration (required if PROPERTY_LOADER=supabase)
 SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_ANON_KEY=tu-anon-key
+SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
 ```
 
 ## Estructura del proyecto
@@ -352,6 +351,8 @@ src/
 ├── db.ts                 # Configuración SQLite
 ├── config/
 │   └── swagger.ts        # Configuración de Swagger/OpenAPI
+├── lib/
+│   └── supabase.ts       # Cliente Supabase compartido
 ├── services/
 │   ├── botService.ts     # Lógica del chatbot
 │   ├── leadService.ts    # Gestión de leads
@@ -360,9 +361,12 @@ src/
 │   ├── toolParser.ts     # Parseo de tool calls
 │   ├── propertyService.ts # Búsqueda de propiedades
 │   ├── openaiClient.ts   # Cliente OpenAI
-│   └── sessionStore.ts   # Almacenamiento en memoria
+│   ├── sessionStore.ts   # Almacenamiento en memoria
+│   └── userService.ts    # Utilidades de usuario (tenant_id, lead_id)
 ├── repositories/
-│   └── leadRepo.ts       # Acceso a datos de leads
+│   ├── leadRepo.ts       # Acceso a datos de leads
+│   ├── propertyRepo.ts   # Acceso a datos de propiedades
+│   └── userRepo.ts       # Acceso a datos de usuarios/autenticación
 ├── routes/
 │   ├── message.ts        # Rutas de mensajes
 │   ├── leads.ts          # Rutas de leads
@@ -370,25 +374,12 @@ src/
 ├── middleware/
 │   └── auth.ts           # Middleware de autenticación
 ├── types/
-│   └── types.ts          # Tipos TypeScript
+│   └── types.ts          # Tipos TypeScript compartidos
 └── public/
     └── index.html        # Interfaz web
 ```
 
 ## Base de datos
 
-La aplicación usa SQLite con la tabla `leads`:
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER | ID autoincremental |
-| createdAt | DATETIME | Fecha de creación |
-| userId | TEXT | Identificador del usuario |
-| operacion | TEXT | venta o alquiler |
-| zona | TEXT | Zona de interés |
-| presupuestoMax | REAL | Presupuesto máximo |
-| nombre | TEXT | Nombre del lead |
-| contacto | TEXT | Info de contacto |
-| summary | TEXT | Resumen de la conversación |
-
-La base de datos se guarda en `data/app.db`.
+La aplicación usa Supabase.
+La scripts de base de datos se guardan en `/sql`.

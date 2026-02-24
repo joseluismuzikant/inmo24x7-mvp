@@ -38,6 +38,7 @@ class ToolExecutor {
     data.presupuestoMax = parsedArgs.presupuestoMax;
 
     const searchResult = await searchProperties({
+      tenant_id: tenantId,
       operacion: parsedArgs.operacion,
       zona: parsedArgs.zona,
       presupuestoMax: parsedArgs.presupuestoMax,
@@ -86,7 +87,7 @@ class ToolExecutor {
     const leadId = await leadService.loadOrCreateLead(visitorId, tenantId, sourceType, data, existingLeadId);
     if (leadId) {
       setLeadId(session, leadId);
-      await leadService.updateLeadData(leadId, {
+      await leadService.updateLeadData(leadId, tenantId, {
         nombre: data.nombre,
         contacto: data.contacto,
         zona: data.zona,
@@ -133,7 +134,7 @@ class ToolExecutor {
     
     if (leadId) {
       if (Object.keys(updatePayload).length > 0) {
-        await leadService.updateLeadData(leadId, updatePayload);
+        await leadService.updateLeadData(leadId, tenantId, updatePayload);
       }
     } else {
       // Create lead with contact info (even without presupuesto)
