@@ -15,7 +15,7 @@ services:
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4.1-mini}
       - PROPERTY_LOADER=${PROPERTY_LOADER:-csv}
       - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
     volumes:
       - ./data:/app/data
     restart: unless-stopped

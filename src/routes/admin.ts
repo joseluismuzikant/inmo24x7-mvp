@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { listLeads, getLeadById } from "../repositories/leadRepo.js";
+import { type AuthenticatedRequest } from "../middleware/auth.js";
 
 export const adminRouter = Router();
 
@@ -37,8 +38,12 @@ function formatDate(v: any) {
    LISTA DE LEADS
 ========================= */
 
-adminRouter.get("/admin/leads", async (_req, res) => {
-  const leads = await listLeads(50);
+adminRouter.get("/admin/leads", async (req: AuthenticatedRequest, res) => {
+  const tenant_id = req.user?.tenant_id;
+  if (!tenant_id) {
+    return res.status(401).json({ error: "Unauthorized - No tenant_id" });
+  }
+  const leads = await listLeads(tenant_id, 50);
 
   const rows = leads
     .map((l: any) => `
@@ -138,13 +143,17 @@ adminRouter.get("/admin/leads", async (_req, res) => {
    DETALLE DE LEAD
 ========================= */
 
-adminRouter.get("/admin/leads/:id", async (req, res) => {
+adminRouter.get("/admin/leads/:id", async (req: AuthenticatedRequest, res) => {
+  const tenant_id = req.user?.tenant_id;
+  if (!tenant_id) {
+    return res.status(401).json({ error: "Unauthorized - No tenant_id" });
+  }
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) {
     return res.status(400).send("ID inválido");
   }
 
-  const lead = await getLeadById(id);
+  const lead = await getLeadById(id, tenant_id);
   if (!lead) {
     return res.status(404).send("Lead no encontrado");
   }

@@ -45,7 +45,7 @@ CREATE TABLE public.zp_posting_pictures (
   width integer,
   height integer,
   multimedia_type_id text,
-  tenant_id uuid,
+  tenant_id uuid NOT NULL,
   CONSTRAINT zp_posting_pictures_pkey PRIMARY KEY (id),
   CONSTRAINT zp_posting_pictures_posting_id_fkey FOREIGN KEY (posting_id) REFERENCES public.zp_postings(id),
   CONSTRAINT zp_posting_pictures_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id)
