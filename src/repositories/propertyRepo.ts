@@ -10,7 +10,7 @@ function parseOperacion(operationType: string): Operation | null {
   return null;
 }
 
-export async function loadPropertiesDB(tenant_id: string): Promise<Property[]> {
+async function loadPropertiesDB(tenant_id: string): Promise<Property[]> {
   if (propertiesCacheByTenant.has(tenant_id)) {
     return propertiesCacheByTenant.get(tenant_id)!;
   }

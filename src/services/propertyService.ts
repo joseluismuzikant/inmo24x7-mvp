@@ -1,7 +1,7 @@
 import { Property, Operation } from "../types/types.js";
 import { loadPropertiesFromCSV } from "./propertyLoader.js";
 import { loadPropertiesFromJson } from "./propertyLoader.js";
-import { loadPropertiesDB, searchPropertiesInSupabase } from "../repositories/propertyRepo.js";
+import { searchPropertiesInSupabase } from "../repositories/propertyRepo.js";
 
 type LoaderType = "csv" | "json" | "supabase";
 
