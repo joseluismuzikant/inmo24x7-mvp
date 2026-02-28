@@ -9,6 +9,7 @@ Asistente virtual de inmobiliaria con integración de OpenAI y SQLite.
 - Persistencia de leads en SQLite
 - Handoff a asesor humano
 - Sesiones en memoria por userId
+- Webhook de WhatsApp (verificación GET + eventos POST)
 
 ## Arquitectura del Sistema
 
@@ -135,6 +136,34 @@ GET /health
   "service": "inmo24x7-api"
 }
 ```
+
+### Webhooks de WhatsApp
+
+#### Verificación del webhook (Meta)
+
+```http
+GET /webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=...&hub.challenge=...
+```
+
+Comportamiento:
+- Si `hub.verify_token === WA_VERIFY_TOKEN` responde `200` con `hub.challenge` en texto plano.
+- Si no coincide responde `403`.
+
+#### Eventos entrantes (mensajes/status)
+
+```http
+POST /webhooks/whatsapp
+X-Hub-Signature-256: sha256=<firma>
+Content-Type: application/json
+```
+
+Comportamiento:
+- Valida firma HMAC SHA-256 con `WA_APP_SECRET` usando `rawBody`.
+- Responde rápido `200` y procesa en background.
+- Si la firma es inválida responde `401`.
+- Para mensajes de texto, ejecuta `botReply(...)` y envía respuesta por Graph API a:
+  `https://graph.facebook.com/${WA_GRAPH_VERSION|v22.0}/{phone_number_id}/messages`.
+- Ignora (con log) eventos sin `messages[]` o mensajes no-texto.
 
 ### Mensajes (Chat)
 
@@ -341,6 +370,13 @@ PROPERTY_LOADER=csv        # opciones: csv | json | supabase (default: csv)
 # Supabase Configuration (required if PROPERTY_LOADER=supabase)
 SUPABASE_URL=https://tu-proyecto.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
+
+# WhatsApp Webhook / Cloud API
+WA_VERIFY_TOKEN=token_para_verificacion_get
+WA_APP_SECRET=app_secret_para_validar_firma_post
+WA_GRAPH_VERSION=v22.0
+WA_ACCESS_TOKEN=token_graph_api_fallback_mvp
+WA_DEFAULT_TENANT_ID=tenant_uuid_fallback_mvp
 ```
 
 ## Estructura del proyecto
@@ -370,7 +406,8 @@ src/
 ├── routes/
 │   ├── message.ts        # Rutas de mensajes
 │   ├── leads.ts          # Rutas de leads
-│   └── admin.ts          # Panel de administración
+│   ├── admin.ts          # Panel de administración
+│   └── whatsapp.ts       # Webhook de WhatsApp (GET verify, POST events)
 ├── middleware/
 │   └── auth.ts           # Middleware de autenticación
 ├── types/
