@@ -23,6 +23,11 @@ export async function authMiddleware(
     return;
   }
 
+  if (req.path.startsWith("/api-docs")) {
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
   const token = authHeader?.substring(7) || '';
 

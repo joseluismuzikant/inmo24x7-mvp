@@ -85,6 +85,7 @@ app.get("/health", (_req, res) => res.json({ ok: true, service: "inmo24x7-api" }
 
 // Swagger documentation (unprotected)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/api-docs.json", (_req, res) => res.json(swaggerSpec));
 
 // WhatsApp webhook verification (unprotected)
 app.use(whatsappRouter);
