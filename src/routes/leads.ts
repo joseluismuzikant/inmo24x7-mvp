@@ -3,7 +3,7 @@ import { getAllLeads, getLeadById, deleteLead } from "../repositories/leadRepo.j
 import { type AuthenticatedRequest } from "../middleware/auth.js";
 import { requireTenantId, requireLeadId } from "../services/userService.js";
 
-const router = Router();
+const leadsRouter = Router();
 
 /**
  * @swagger
@@ -31,7 +31,7 @@ const router = Router();
  *       500:
  *         description: Server error
  */
-router.get("/api/leads", async (req: AuthenticatedRequest, res) => {
+leadsRouter.get("/api/leads", async (req: AuthenticatedRequest, res) => {
   try {
     const tenant_id = requireTenantId(req);
     const leads = await getAllLeads(tenant_id);
@@ -80,7 +80,7 @@ router.get("/api/leads", async (req: AuthenticatedRequest, res) => {
  *       500:
  *         description: Server error
  */
-router.get("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
+leadsRouter.get("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
   try {
     const tenant_id = requireTenantId(req);
     const leadId = requireLeadId(req);
@@ -133,7 +133,7 @@ router.get("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
  *       500:
  *         description: Server error
  */
-router.delete("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
+leadsRouter.delete("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
   try {
     const tenant_id = requireTenantId(req);
     const leadId = requireLeadId(req);
@@ -149,4 +149,4 @@ router.delete("/api/leads/:id", async (req: AuthenticatedRequest, res) => {
   }
 });
 
-export { router as leadsRouter };
+export { leadsRouter as leadsRouter };
