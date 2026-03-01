@@ -15,6 +15,8 @@ import { authMiddleware } from "./middleware/auth.js";
 import { swaggerSpec } from "./config/swagger.js";
 
 const app = express();
+const appVersion = process.env.APP_VERSION ?? "dev";
+const appCommitSha = process.env.APP_COMMIT_SHA ?? "local";
 
 /**
  * CORS
@@ -80,8 +82,19 @@ app.use(express.static(path.join(process.cwd(), "src", "public")));
  *                   type: boolean
  *                 service:
  *                   type: string
+ *                 version:
+ *                   type: string
+ *                 commit:
+ *                   type: string
  */
-app.get("/health", (_req, res) => res.json({ ok: true, service: "inmo24x7-api" }));
+app.get("/health", (_req, res) =>
+  res.json({
+    ok: true,
+    service: "inmo24x7-api",
+    version: appVersion,
+    commit: appCommitSha,
+  })
+);
 
 // Swagger documentation (unprotected)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

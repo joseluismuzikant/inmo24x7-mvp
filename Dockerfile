@@ -21,7 +21,12 @@ RUN rm -rf dist && npm run build
 FROM node:22-alpine AS runtime
 WORKDIR /app
 
-ENV NODE_ENV=production
+ARG APP_VERSION=dev
+ARG APP_COMMIT_SHA=local
+
+ENV NODE_ENV=production \
+    APP_VERSION=$APP_VERSION \
+    APP_COMMIT_SHA=$APP_COMMIT_SHA
 
 # Optional: if you use native modules, this keeps compatibility
 RUN apk add --no-cache libc6-compat
