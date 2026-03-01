@@ -2,12 +2,13 @@ name: Build (auto) + Deploy to DigitalOcean (manual)
 
 on:
   push:
-    branches: ["main"]
+    # ✅ build de cualquier rama (para poder desplegar “cualquier build” a mano)
+    branches: ["**"]
 
   workflow_dispatch:
     inputs:
       tag:
-        description: "Image tag to deploy (latest o sha-<commit>)"
+        description: "Image tag to deploy (latest | sha-<commit> | branch-<branch>)"
         required: false
         default: "latest"
 
@@ -31,6 +32,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ✅ armamos tag de rama compatible con Docker (reemplaza / por -)
+      - name: Compute branch tag
+        id: vars
+        run: |
+          BRANCH="${GITHUB_REF_NAME//\//-}"
+          echo "branch_tag=branch-${BRANCH}" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -49,6 +57,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.branch_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -94,6 +103,13 @@ jobs:
 
             # Login a GHCR desde el droplet (PAT)
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+
+            # (Opcional pero útil) validar que el tag exista
+            if ! docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then
+              echo "ERROR: La imagen/tag no existe en GHCR: ${IMAGE}"
+              echo "Asegurate de haber pusheado esa rama/commit para que se buildée y publique."
+              exit 1
+            fi
 
             docker pull "${IMAGE}"
 
