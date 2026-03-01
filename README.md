@@ -293,7 +293,23 @@ Sirve la interfaz web de chat desde `src/public/index.html`
 |--------|-------------|
 | `npm run dev` | Inicia el servidor en modo desarrollo con hot reload |
 | `npm run build` | Compila TypeScript a JavaScript |
+| `npm test` | Ejecuta toda la suite de tests con Vitest |
+| `npm run test:watch` | Ejecuta tests en modo watch |
 | `npm start` | Ejecuta el servidor compilado |
+
+## Tests
+
+Para correr los tests:
+
+```bash
+npm test
+```
+
+Para desarrollo con re-ejecución automática:
+
+```bash
+npm run test:watch
+```
 
 ## Docker
 
