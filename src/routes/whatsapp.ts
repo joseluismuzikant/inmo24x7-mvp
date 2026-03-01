@@ -153,10 +153,12 @@ async function processIncomingMessage(payload: any): Promise<void> {
   });
 
   const messages = reply.messages.filter((msg) => typeof msg === "string" && msg.trim().length > 0);
+  const to = from.startsWith("549") ? "54" + from.slice(3) : from;
+// 5491151060793 -> 5411151060793
   for (const botMessage of messages) {
     await sendWhatsAppTextMessage({
       phoneNumberId,
-      to: from,
+      to,
       text: botMessage,
       accessToken: config.accessToken,
     });
