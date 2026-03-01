@@ -123,7 +123,7 @@ async function processIncomingMessage(payload: any): Promise<void> {
   const value = payload?.entry?.[0]?.changes?.[0]?.value;
   const phoneNumberId = readText(value?.metadata?.phone_number_id);
   const message = value?.messages?.[0];
-
+  
   if (!message) {
     console.log("ℹ️ WhatsApp webhook without message payload (likely status update)");
     return;
@@ -131,6 +131,8 @@ async function processIncomingMessage(payload: any): Promise<void> {
 
   const from = readText(message?.from);
   const text = readText(message?.text?.body);
+
+  console.log("WA phone_number_id:", phoneNumberId, "from:", from);
 
   if (!phoneNumberId || !from || !text) {
     console.log("ℹ️ WhatsApp non-text or incomplete message ignored");
