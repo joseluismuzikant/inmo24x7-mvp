@@ -11,7 +11,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4.1-mini}
       - PROPERTY_LOADER=${PROPERTY_LOADER:-csv}
       - SUPABASE_URL=${SUPABASE_URL}
@@ -25,3 +25,17 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  # --- AGREGAR: enviar logs Docker de este droplet a Loki (logs.inmo24x7.com) ---
+  alloy:
+    image: grafana/alloy:latest
+    container_name: inmo24x7-alloy
+    restart: unless-stopped
+    command: ["run", "/etc/alloy/config.alloy"]
+    volumes:
+      - ./observability/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy
+
+volumes:
+  alloy_data:
